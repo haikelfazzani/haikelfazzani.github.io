@@ -1,7 +1,7 @@
 ---
 title: "Beyond the Swarm API: Why We Need an Agent Network Protocol (ANP)"
 description: "Exploring why centralized orchestration limits agent networks and introducing the Agent Network Protocol (ANP) for decentralized, scalable multi-agent systems."
-publishedDate: 2025-01-27
+publishedDate: 2025-09-30
 ---
 
 By Haikel Fazzani
