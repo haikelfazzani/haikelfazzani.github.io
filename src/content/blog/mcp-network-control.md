@@ -1,7 +1,7 @@
 ---
 title: "MCP at the Edge of a Commit"
 description: "A visual research note on Model Context Protocol and network control: ASCII diagrams, protocol traces, and a tested Python experiment on concurrent writes."
-publishedDate: 2026-10-27
+publishedDate: 2026-03-12
 ---
 
 *Research note · Haikel Fazzani · Diagrams, protocol traces, and a local experiment*

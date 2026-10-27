@@ -1,7 +1,7 @@
 ---
 title: "Beyond Prompt Chains: System-Level Primitives for Autonomous Execution and Complex Reasoning Loops"
 description: "Exploring system-level primitives for autonomous execution, moving beyond linear prompt loops to structured reasoning state machines and low-latency interaction."
-publishedDate: 2025-01-27
+publishedDate: 2026-10-26
 ---
 
 By Haikel Fazzani
