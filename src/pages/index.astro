@@ -17,6 +17,22 @@ const posts = allPosts.sort((a, b) => b.data.publishedDate.valueOf() - a.data.pu
     </div>
   </section>
 
+  <section class="diagram-section">
+    <pre class="ascii-diagram">
+    +-------------------+          +-------------------+
+    |   REASONING       | <=====> |   MEMORY STORE    |
+    |   PLANE           |          |                   |
+    +-------------------+          +-------------------+
+              |                                  |
+              |  Decoupled Intents             |  State
+              v                                  |
+    +-------------------+          +-------------------+
+    |   EXECUTION       |          |   NETWORK MESH    |
+    |   PLANE           | <=====> |   (P2P / IPC)     |
+    +-------------------+          +-------------------+
+    </pre>
+  </section>
+
   <section class="recent-posts">
     <p class="eyebrow">Recent articles</p>
     <h2 class="section-title">Latest from the blog</h2>
@@ -33,6 +49,24 @@ const posts = allPosts.sort((a, b) => b.data.publishedDate.valueOf() - a.data.pu
 </PageLayout>
 
 <style>
+  .diagram-section {
+    max-width: 760px;
+    margin: 3rem auto;
+    text-align: center;
+  }
+
+  .ascii-diagram {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    overflow-x: auto;
+    color: #404040;
+  }
+
   .recent-posts {
     max-width: 760px;
     margin: 4rem auto;
