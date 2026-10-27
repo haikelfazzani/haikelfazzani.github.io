@@ -1,0 +1,25 @@
+---
+interface Props { id: string; label: string; subtitle: string; icon: string; x: number; y: number; }
+const { id, label, subtitle, icon, x, y } = Astro.props;
+---
+<g class="workflow-node" data-node={id} transform={`translate(${x} ${y})`} role="button" tabindex="0" aria-label={`${label}: ${subtitle}`}>
+  <rect class="node-box" width="148" height="78" rx="12" />
+  <rect class="node-icon" x="12" y="13" width="27" height="27" rx="6" />
+  <text x="25.5" y="32" text-anchor="middle" class="icon-label">{icon}</text>
+  <text x="48" y="31" class="node-label">{label}</text>
+  <text x="13" y="60" class="node-subtitle">{subtitle}</text>
+  <circle class="port" cx="0" cy="39" r="4" /><circle class="port" cx="148" cy="39" r="4" />
+</g>
+<style>
+  .node-box { fill: white; stroke: #d6d6d6; stroke-width: 1.3; }
+  .node-icon { fill: #f4f4f4; }
+  .icon-label { font: 13px 'Geist Mono', monospace; fill: #525252; }
+  .node-label { font: 500 12px Geist, sans-serif; fill: #171717; }
+  .node-subtitle { font: 10px Geist, sans-serif; fill: #737373; }
+  .port { fill: white; stroke: #aaa; stroke-width: 1.3; }
+  .workflow-node { cursor: pointer; outline: none; }
+  .workflow-node:hover .node-box, .workflow-node:focus-visible .node-box { stroke: #171717; stroke-width: 2; }
+  .workflow-node[data-active] .node-box { stroke: #d66a4a; stroke-width: 2; fill: #fffaf7; }
+  .workflow-node[data-active] .node-icon { fill: #fae7de; }
+  .workflow-node[data-complete] .port { fill: #d66a4a; stroke: #d66a4a; }
+</style>

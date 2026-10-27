@@ -1,0 +1,32 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog');
+const posts = allPosts.sort((a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf());
+---
+
+<PageLayout title="Blog">
+  <section class="blog-section">
+    <p class="eyebrow">Ideas &amp; notes</p>
+    <h1 class="blog-title">Blog</h1>
+    <p class="blog-intro">Thoughts on technology, programming, and things I learn along the way.</p>
+    <div class="posts-grid">
+      {posts.map((post) => (
+        <article class="post-card">
+          <a href={`/blog/${post.id}`} class="post-link">
+            <h2 class="post-title">{post.data.title}</h2>
+            <p class="post-description">{post.data.description}</p>
+            <time class="post-date" datetime={post.data.publishedDate.toISOString()}>
+              {post.data.publishedDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </time>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+</PageLayout>

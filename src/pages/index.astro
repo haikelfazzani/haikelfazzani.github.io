@@ -1,0 +1,71 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import SelectedProjects from '../components/SelectedProjects.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog');
+const posts = allPosts.sort((a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf());
+---
+
+<PageLayout title="Home">
+  <section class="hero">
+    <p class="eyebrow">Engineer &amp; lifelong learner</p>
+    <h1 class="hero-title">Hi, I'm <em>Haikel Fazzani.</em></h1>
+    <p class="hero-subtitle">Building software. Sharing ideas. Always learning.</p>
+    <div class="hero-actions">
+      <a href="/blog" class="btn btn-primary">Read my blog <span aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+
+  <section class="recent-posts">
+    <p class="eyebrow">Recent articles</p>
+    <h2 class="section-title">Latest from the blog</h2>
+    <div class="posts-grid">
+      {posts.map((post) => (
+        <a href={`/blog/${post.id}`} class="post-card">
+          <h3 class="post-title">{post.data.title}</h3>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <SelectedProjects />
+</PageLayout>
+
+<style>
+  .recent-posts {
+    max-width: 760px;
+    margin: 4rem auto;
+  }
+
+  .section-title {
+    font-size: clamp(1.5rem, 3vw, 1.875rem);
+    margin-bottom: 2rem;
+  }
+
+  .posts-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .post-card {
+    display: block;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .post-card:hover {
+    border-color: #bdbdbd;
+    background: #fafafa;
+  }
+
+  .post-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #0a0a0a;
+    margin: 0;
+  }
+</style>

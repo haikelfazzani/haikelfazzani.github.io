@@ -1,0 +1,77 @@
+---
+const projects = [
+  {
+    name: 'dns-packet', owner: 'haikelfazzani', category: 'Networking',
+    description: 'Encode and decode DNS packets across Node.js, Deno, Bun, and the browser, with support for EDNS0.',
+  },
+  {
+    name: 'dard', owner: 'haikelfazzani', category: 'Language design',
+    description: 'An educational programming language in French, with an interpreter built from scratch in C, Flex, and Bison.',
+  },
+  {
+    name: 'pingy', owner: 'haikelfazzani', category: 'Command line',
+    description: 'A small ICMP Echo command-line tool for checking network connections, written in Go.',
+  },
+  {
+    name: 'servino', owner: 'wutility', category: 'Developer tools',
+    description: 'A zero-configuration HTTP server with hot reload for a fast, straightforward local development workflow.',
+  },
+  {
+    name: 'stretto', owner: 'wutility', category: 'HTTP & streaming',
+    description: 'A fetch-based client for streaming and non-streaming JSON APIs, with memory and buffer management.',
+  },
+  {
+    name: 'netfilter', owner: 'Chromo-lib', category: 'Privacy',
+    description: 'A blocker for ads, trackers, coin miners, popups, and malicious sites.',
+  },
+];
+---
+<section class="projects" aria-labelledby="projects-heading">
+  <header class="projects-header">
+    <div>
+      <p class="eyebrow">Built in the open</p>
+      <h2 id="projects-heading">Selected open source</h2>
+      <p class="projects-intro">A few of my projects, from networking tools to language experiments.</p>
+    </div>
+    <a class="profile-link" href="https://github.com/haikelfazzani">GitHub <span aria-hidden="true">↗</span></a>
+  </header>
+  <ul class="project-grid" role="list">
+    {projects.map(project => (
+      <li>
+        <a class="project" href={`https://github.com/${project.owner}/${project.name}`} aria-label={`${project.name} on GitHub`}>
+          <div class="project-top"><span class="project-category">{project.category}</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+          <h3>{project.name}</h3>
+          <p class="project-description">{project.description}</p>
+          <span class="project-repo">{project.owner} / {project.name}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .projects { max-width: 760px; margin: 1rem auto 0; padding-top: 2rem; border-top: 1px solid var(--border); }
+  .projects-header { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.75rem; }
+  .eyebrow { margin-bottom: 0.65rem; font-size: 10px; }
+  h2 { font-size: clamp(1.375rem, 3vw, 1.625rem); font-weight: 500; letter-spacing: -0.035em; line-height: 1.3; }
+  .projects-intro { margin-top: 0.6rem; font-size: 13px; color: var(--muted); max-width: 48ch; }
+  .profile-link { flex-shrink: 0; color: #525252; font-size: 12px; text-decoration: none; }
+  .profile-link span { margin-left: 0.4rem; }
+  .profile-link:hover { color: #0a0a0a; text-decoration: underline; }
+  .project-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .project { display: flex; flex-direction: column; height: 100%; padding: 1.4rem; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; background: white; transition: background 150ms, border-color 150ms; }
+  .project:hover, .project:focus-visible { background: #fafafa; border-color: #bdbdbd; }
+  .project-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .project-category { font-family: 'Geist Mono', monospace; font-size: 10px; color: #737373; }
+  .project-arrow { color: #737373; font-size: 15px; }
+  h3 { font-size: 17px; font-weight: 500; letter-spacing: -0.025em; margin-bottom: 0.5rem; }
+  .project-description { font-size: 13px; line-height: 1.75; color: #646464; margin-bottom: 1.5rem; }
+  .project-repo { margin-top: auto; font-family: 'Geist Mono', monospace; font-size: 10px; color: #737373; overflow-wrap: anywhere; }
+  @media (max-width: 560px) {
+    .project-grid { grid-template-columns: 1fr; }
+    .projects-header { align-items: flex-start; gap: 1rem; }
+    .profile-link { margin-top: 1.8rem; }
+    .project { padding: 1.25rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .project { transition: none; } }
+</style>

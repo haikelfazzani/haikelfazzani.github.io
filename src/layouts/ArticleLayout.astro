@@ -1,0 +1,44 @@
+---
+import PageLayout from './PageLayout.astro';
+
+interface Props {
+  title: string;
+  publishedDate?: Date;
+  headings?: { depth: number; slug: string; text: string }[];
+}
+
+const { title, publishedDate, headings = [] } = Astro.props;
+const sections = headings.filter(heading => heading.depth === 2);
+---
+
+<PageLayout title={title}>
+  <div class:list={['article-layout', { 'has-toc': sections.length > 0 }]}>
+    <a href="/blog" class="back-link">← All articles</a>
+    <article class="article">
+      <header class="article-header">
+        <h1 class="article-title">{title}</h1>
+        {publishedDate && (
+          <time class="article-date" datetime={publishedDate.toISOString()}>
+            {publishedDate.toLocaleDateString('en-US', {
+              year: 'numeric', month: 'long', day: 'numeric'
+            })}
+          </time>
+        )}
+      </header>
+      <slot name="explanation" />
+      <div class="article-body">
+        {sections.length > 0 && (
+          <aside class="article-sidebar">
+            <nav class="article-toc" aria-label="Table of contents">
+              <p>In this note</p>
+              <ol>
+                {sections.map(section => <li><a href={`#${section.slug}`}>{section.text}</a></li>)}
+              </ol>
+            </nav>
+          </aside>
+        )}
+        <div class="article-content"><slot /></div>
+      </div>
+    </article>
+  </div>
+</PageLayout>

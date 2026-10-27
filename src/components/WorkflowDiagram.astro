@@ -1,0 +1,117 @@
+---
+import WorkflowNode from './WorkflowNode.astro';
+interface Node { id: string; label: string; subtitle: string; icon: string; x: number; y: number; description: string; }
+interface Edge { id: string; path: string; label?: string; labelX?: number; labelY?: number; }
+interface Step { node: string; edge?: string; caption: string; }
+interface Props { title: string; nodes: Node[]; edges: Edge[]; steps: Step[]; }
+const { title, nodes, edges, steps } = Astro.props;
+const uid = `flow-${crypto.randomUUID()}`;
+---
+<workflow-diagram data-steps={JSON.stringify(steps)} data-nodes={JSON.stringify(nodes)}>
+  <div class="workflow-header"><div><p class="eyebrow">Interactive workflow</p><h2 id={uid}>{title}</h2></div><div class="workflow-actions"><button data-replay hidden aria-label="Restart workflow">↺</button><button data-play hidden>Play workflow</button></div></div>
+  <div class="workflow-scroll" tabindex="0" role="region" aria-label="Workflow canvas; scroll horizontally on smaller screens">
+    <svg viewBox="0 0 840 530" aria-labelledby={uid}>
+      <defs><pattern id={`${uid}-grid`} width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.7" fill="#d9d9d9" /></pattern><marker id={`${uid}-arrow`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a3a3a3" /></marker></defs>
+      <rect width="840" height="530" fill={`url(#${uid}-grid)`} />
+      <text x="32" y="32" class="lane-label">01 / BUILD THE INDEX</text>
+      <text x="32" y="375" class="lane-label">02 / ANSWER A QUESTION</text>
+      {edges.map(edge => <g><path data-edge={edge.id} d={edge.path} class="edge" marker-end={`url(#${uid}-arrow)`} />{edge.label && <text x={edge.labelX} y={edge.labelY} class="edge-label" text-anchor="middle">{edge.label}</text>}</g>)}
+      {nodes.map(node => <WorkflowNode {...node} />)}
+      <circle data-packet r="4.5" fill="#d66a4a" visibility="hidden" />
+    </svg>
+  </div>
+  <div class="workflow-caption"><span data-count>01 / {String(steps.length).padStart(2, '0')}</span><p data-caption>{steps[0].caption}</p></div>
+  <p class="workflow-hint">Select a node to explore · One continuous flow · Scroll the canvas on mobile</p>
+  <noscript><ol>{nodes.map(node => <li><strong>{node.label}:</strong> {node.description}</li>)}</ol></noscript>
+</workflow-diagram>
+<script>
+  import { animate } from 'animejs';
+  class WorkflowDiagram extends HTMLElement {
+    cleanup?: () => void;
+    connectedCallback() {
+      if (this.cleanup) return;
+      const steps = JSON.parse(this.dataset.steps!);
+      const data = JSON.parse(this.dataset.nodes!);
+      const nodes = Array.from(this.querySelectorAll<SVGGElement>('[data-node]'));
+      const edges = Array.from(this.querySelectorAll<SVGPathElement>('[data-edge]'));
+      const packet = this.querySelector<SVGCircleElement>('[data-packet]')!;
+      const caption = this.querySelector<HTMLElement>('[data-caption]')!;
+      const count = this.querySelector<HTMLElement>('[data-count]')!;
+      const play = this.querySelector<HTMLButtonElement>('[data-play]')!;
+      const replay = this.querySelector<HTMLButtonElement>('[data-replay]')!;
+      const motion = matchMedia('(prefers-reduced-motion: reduce)');
+      const state = { progress: 0 };
+      let last = -1;
+      let finished = false;
+      function draw() {
+        const index = Math.min(steps.length - 1, Math.floor(state.progress));
+        const step = steps[index];
+        if (last !== index) {
+          last = index;
+          nodes.forEach(node => {
+            node.toggleAttribute('data-active', node.dataset.node === step.node);
+            node.toggleAttribute('data-complete', steps.slice(0, index).some((s: {node: string}) => s.node === node.dataset.node));
+          });
+          edges.forEach(edge => edge.toggleAttribute('data-active', edge.dataset.edge === step.edge));
+          caption.textContent = step.caption;
+          count.textContent = `${String(index + 1).padStart(2, '0')} / ${String(steps.length).padStart(2, '0')}`;
+        }
+        const edge = edges.find(edge => edge.dataset.edge === step.edge);
+        packet.setAttribute('visibility', edge && !motion.matches ? 'visible' : 'hidden');
+        if (edge) {
+          const point = edge.getPointAtLength(edge.getTotalLength() * Math.min(1, (state.progress % 1) / 0.7));
+          packet.setAttribute('cx', String(point.x));packet.setAttribute('cy', String(point.y));
+        }
+      }
+      const animation = animate(state, { progress: steps.length, duration: steps.length * 2600, ease: 'linear', autoplay: false, onUpdate: draw, onComplete: () => { finished = true; play.textContent = 'Replay workflow'; play.setAttribute('aria-pressed', 'false'); packet.setAttribute('visibility', 'hidden'); } });
+      const pause = () => { animation.pause(); play.textContent = 'Play workflow'; play.setAttribute('aria-pressed', 'false'); };
+      const start = () => {
+        if (motion.matches) { pause(); return; }
+        play.textContent = 'Pause'; play.setAttribute('aria-pressed', 'true');
+        if (finished) { finished = false; animation.restart(); } else animation.play();
+      };
+      play.addEventListener('click', () => animation.paused ? start() : pause());
+      replay.addEventListener('click', () => { pause(); finished = false; animation.seek(0); last = -1; draw(); });
+      nodes.forEach(node => {
+        const select = () => {
+          pause(); finished = false; const index = steps.findIndex((step: {node: string}) => step.node === node.dataset.node);
+          animation.seek(index * 2600); last = -1; draw();
+          caption.textContent = data.find((item: {id: string}) => item.id === node.dataset.node).description;
+          packet.setAttribute('visibility', 'hidden');
+        };
+        node.addEventListener('click', select);
+        node.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') {e.preventDefault();select();} });
+      });
+      const visibility = () => { if (document.hidden) pause(); };
+      const preference = () => { if (motion.matches) pause(); play.hidden = motion.matches; packet.setAttribute('visibility', 'hidden'); };
+      motion.addEventListener('change', preference);
+      document.addEventListener('visibilitychange', visibility);
+      const observer = new IntersectionObserver(entries => { if (!entries[0].isIntersecting) pause(); });
+      observer.observe(this);
+      play.hidden = motion.matches; replay.hidden = false; draw();
+      this.cleanup = () => { animation.cancel(); observer.disconnect(); motion.removeEventListener('change', preference); document.removeEventListener('visibilitychange', visibility); };
+    }
+    disconnectedCallback() { this.cleanup?.(); this.cleanup = undefined; }
+  }
+  if (!customElements.get('workflow-diagram')) customElements.define('workflow-diagram', WorkflowDiagram);
+</script>
+<style>
+  workflow-diagram { display: block; margin-bottom: 2.5rem; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; }
+  .workflow-header { padding: 1.2rem 1.4rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .eyebrow { font-size: 9px; margin-bottom: 0.35rem; }
+  h2 { font-size: 1.0625rem; font-weight: 500; letter-spacing: -0.025em; }
+  .workflow-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  button { border: 1px solid #dedede; border-radius: 6px; padding: 0.4rem 0.65rem; font-size: 11px; background: white; }
+  button:hover { background: #f4f4f4; }
+  .workflow-scroll { overflow-x: auto; background: #fafafa; border-block: 1px solid #e8e8e8; }
+  svg { width: 100%; min-width: 680px; display: block; }
+  .lane-label { font: 9px 'Geist Mono', monospace; fill: #737373; letter-spacing: 1px; }
+  .edge { fill: none; stroke: #bdbdbd; stroke-width: 1.6; }
+  .edge[data-active] { stroke: #d66a4a; stroke-width: 2; }
+  .edge-label { font: 10px Geist, sans-serif; fill: #737373; paint-order: stroke; stroke: #fafafa; stroke-width: 5px; }
+  .workflow-caption { padding: 1rem 1.4rem; display: flex; align-items: baseline; gap: 1rem; min-height: 95px; }
+  .workflow-caption span { font: 10px 'Geist Mono', monospace; color: #9b573c; white-space: nowrap; }
+  .workflow-caption p { font-size: 13px; line-height: 1.7; color: #525252; }
+  .workflow-hint { padding: 0 1.4rem 1rem; font-size: 10px; color: #737373; }
+  @media (max-width: 480px) { .workflow-header { padding: 1rem; } h2 { font-size: 14px; } .workflow-caption { padding: 1rem; min-height: 125px; } }
+</style>

@@ -1,0 +1,9 @@
+node_modules/
+.astro/
+.env
+package-lock.json
+.devin
+.codex
+.freebuff
+.cursor-agent
+.agents
